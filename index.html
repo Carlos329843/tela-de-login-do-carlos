@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head> 
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="styles.css">    
+    <title>Carlos_teste_Login</title>
+</head>
+<body>
+
+    <!-- Canvas para animação de partículas -->
+    <canvas id="particles-bg"></canvas>
+
+    <main class="container">
+        <form>
+            <h1>Login Carlos</h1>
+            <div class="input-box">
+                <input placeholder="Usuario" type="email">
+            </div>
+            <div class="input-box">
+                <input placeholder="Senha" type="password">
+            </div>
+            <div class="remember-forgot">
+                <label>
+                <input type="checkbox">
+                Lembrar senha
+            </label>
+            <a href="#">Esqueci senha</a>
+            </div>
+            <button type="submit" class="login">Login</button>
+
+            <div class="register-Link">
+                <p>Nao tem uma conta?<a href="#">Cadastre-se</a></p>
+            </div>
+        </form>    
+    </main>
+
+    <script>
+        const canvas = document.getElementById('particles-bg');
+        const ctx = canvas.getContext('2d');
+
+        function resize() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+        resize();
+        window.addEventListener('resize', () => {
+            resize();
+            initParticles();
+        });
+
+        // Cores inspiradas na imagem: roxo escuro + vermelho/pink
+        const COLORS = ['#e8185a', '#c41a4a', '#a8153f', '#ff2d6b', '#7b1a3a', '#ff6b9d'];
+
+        let particles = [];
+
+        function initParticles() {
+            particles = [];
+            const NUM = Math.floor((canvas.width * canvas.height) / 12000);
+            for (let i = 0; i < NUM; i++) {
+                particles.push({
+                    x: Math.random() * canvas.width,
+                    y: Math.random() * canvas.height,
+                    r: Math.random() * 2 + 0.5,
+                    vx: (Math.random() - 0.5) * 0.5,
+                    vy: (Math.random() - 0.5) * 0.5,
+                    color: COLORS[Math.floor(Math.random() * COLORS.length)],
+                    alpha: Math.random() * 0.6 + 0.15,
+                    // pulso
+                    pulse: Math.random() * Math.PI * 2,
+                    pulseSpeed: Math.random() * 0.02 + 0.005
+                });
+            }
+        }
+        initParticles();
+
+        function draw() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // Linhas de conexão
+            for (let i = 0; i < particles.length; i++) {
+                for (let j = i + 1; j < particles.length; j++) {
+                    const p = particles[i], q = particles[j];
+                    const dx = p.x - q.x, dy = p.y - q.y;
+                    const dist = Math.sqrt(dx * dx + dy * dy);
+                    if (dist < 120) {
+                        ctx.beginPath();
+                        ctx.strokeStyle = `rgba(232, 24, 90, ${0.15 * (1 - dist / 120)})`;
+                        ctx.lineWidth = 0.5;
+                        ctx.moveTo(p.x, p.y);
+                        ctx.lineTo(q.x, q.y);
+                        ctx.stroke();
+                    }
+                }
+            }
+
+            // Partículas
+            particles.forEach(p => {
+                p.pulse += p.pulseSpeed;
+                const pulsedAlpha = p.alpha + Math.sin(p.pulse) * 0.1;
+
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+                ctx.fillStyle = p.color;
+                ctx.globalAlpha = Math.max(0, Math.min(1, pulsedAlpha));
+                ctx.fill();
+                ctx.globalAlpha = 1;
+
+                p.x += p.vx;
+                p.y += p.vy;
+
+                // Rebate nas bordas
+                if (p.x < 0 || p.x > canvas.width) p.vx *= -1;
+                if (p.y < 0 || p.y > canvas.height) p.vy *= -1;
+            });
+
+            requestAnimationFrame(draw);
+        }
+        draw();
+    </script>
+</body>
+</html>
